@@ -1,4 +1,7 @@
 import tkinter as tk
+import calendar
+datetime = calendar.datetime.datetime
+timedelta = calendar.datetime.timedelta
 from tkinter import ttk
 import tkinter.ttk as ttk
 from tkinter import messagebox
@@ -57,6 +60,17 @@ save = tk.Button(#儲存鍵
         height = 2,
         command = button_event
 )
+
+AccountingWaylbl = tk.Label(#記帳輸入方式標籤
+        window,
+        text = '記帳輸入方式',
+        bg = 'white',
+        fg = 'black',
+        font = ('Arial', 12),
+        width = 10,
+        height = 1
+)
+
 AccountingWay = ttk.Combobox(#選擇記帳方式
         window,
         values = [
@@ -64,7 +78,22 @@ AccountingWay = ttk.Combobox(#選擇記帳方式
                 '文字辨識輸入']
 )
 AccountingWay.current(0)#選擇記帳方式預設為手動輸入
-date = tk.Entry(window, width = 20)#選擇的日期，尚未完成
+
+datelbl = tk.Label(#日期標籤
+        window,
+        text = '日期',
+        bg = 'white',
+        fg = 'black',
+        font = ('Arial', 12),
+        width = 10,
+        height = 1
+)
+
+date = tk.Entry(#選擇的日期，尚未完成
+        window, 
+        width = 20
+)
+
 Moneylbl = tk.Label(#金額標籤
         window,
         text = '金額',
@@ -84,7 +113,7 @@ money = tk.Entry(#輸入金額
 ItemTypelbl = tk.Label(#類別標籤
         window,
         text = '類別',
-        bg = 'white',
+        bg = 'orange',
         fg = 'black',
         font = ('Arial', 12),
         width = 30,
@@ -105,6 +134,7 @@ PayItem = ttk.Combobox(#選擇支出類別
                 '其他'],
         width = 10
 )
+
 PayItem.current(0)#將支出類別預設為飲食
 blank = tk.Label(#間隔
         window,
@@ -120,16 +150,16 @@ Notelbl = tk.Label(#備註標籤
         width = 10,
         height = 2
 )
-note = tk.Entry(window, width = 30)
-
-
+note = tk.Entry(window, width = 20)
 
 
 cancel.grid(column=0, row=0)
 pay.grid(column=1, row=0)
 income.grid(column=2, row=0)
 save.grid(column=3, row=0)
+AccountingWaylbl.grid(column=0, row=1, columnspan=1)
 AccountingWay.grid(column=1, row=1, columnspan=2)
+datelbl.grid(column=0, row=2, columnspan=1)
 date.grid(column=0, row=2, columnspan=4)
 Moneylbl.grid(column=0, row=3, columnspan=3)
 money.grid(column=3, row=3)
@@ -137,6 +167,6 @@ ItemTypelbl.grid(column=0, row=4, columnspan=3)
 PayItem.grid(column=3, row=4)
 blank.grid(column=0, row=5, columnspan=4)
 Notelbl.grid(column=0, row=6)
-note.grid(column=1, row=6, columnspan=3)
+note.grid(column=1, row=6, columnspan=2)
 
 window.mainloop()
