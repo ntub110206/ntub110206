@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import filedialog
 import re
 
-def tesseract(filename):
+def tesseract_total(filename):
     img_name = file_path
     img = Image.open(img_name)
     text = pytesseract.image_to_string(img, lang='chi_tra+eng')
@@ -16,6 +16,6 @@ file = tk.Tk()
 file.withdraw()
 file_path = filedialog.askopenfilename()
 # print(file_path)
-txt = tesseract(file_path)
+txt = tesseract_total(file_path)
 
 print(txt)
