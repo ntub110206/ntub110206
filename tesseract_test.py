@@ -8,8 +8,11 @@ def tesseract_total(filename):
     img_name = file_path
     img = Image.open(img_name)
     text = pytesseract.image_to_string(img, lang='chi_tra+eng')
-    cost = re.search(r'總計\s*:\s*(\d+)', text)
-    result = cost.group(0)
+    try:
+        cost = re.search(r'總計\s*:\s*(\d+)', text)
+        result = cost.group(0)
+    except AttributeError:
+        return "not found"
     return result
     
 file = tk.Tk()
