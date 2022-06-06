@@ -1,24 +1,16 @@
 import tkinter as tk
-import calendar
-datetime = calendar.datetime.datetime
-timedelta = calendar.datetime.timedelta
-from tkinter import ttk
+#from tkinter import ttk
 import tkinter.ttk as ttk
 from tkinter import messagebox
+import datetime
+import time
+import calendar
 
-def button_event():#判斷金額欄的輸入值是否正確
-    print(money.get())
-    if money.get() == '':
-        tk.messagebox.showerror('message', '請輸入金額')
-    else:
-        tk.messagebox.showinfo('message', '已新增一筆帳目')
-
-def validate(P):
-    print(P)
-    if str.isdigit(P) or P == '':
-        return True
-    else:
-        return False
+def com():
+    try:
+        float(money.get())#獲取e1的值，轉為浮點數，如果不能轉捕獲異常
+    except:
+        messagebox.showwarning('警告','金額請輸入數字')
 
 window = tk.Tk()
 window.title('記帳表單')
@@ -58,7 +50,7 @@ save = tk.Button(#儲存鍵
         font = ('Arial', 12),
         width = 10,
         height = 2,
-        command = button_event
+        command = com
 )
 
 AccountingWaylbl = tk.Label(#記帳輸入方式標籤
@@ -89,31 +81,30 @@ datelbl = tk.Label(#日期標籤
         height = 1
 )
 
-date = tk.Entry(#選擇的日期，尚未完成
+date = tk.Entry(#選擇的日期
         window, 
         width = 20
 )
+date.insert(0,datetime.date.today())
+print(datetime.date.today())
 
 Moneylbl = tk.Label(#金額標籤
         window,
         text = '金額',
-        bg = 'white',
+        bg = 'orange',
         fg = 'black',
         font = ('Arial', 12),
         width = 30,
         height = 2
 )
-Moneycmd = (window.register(validate), '%P')
 money = tk.Entry(#輸入金額
         window,
-        validate ='key',
-        validatecommand = Moneycmd,
         width = 10
 )
 ItemTypelbl = tk.Label(#類別標籤
         window,
         text = '類別',
-        bg = 'orange',
+        bg = '#59deff',
         fg = 'black',
         font = ('Arial', 12),
         width = 30,
@@ -134,8 +125,48 @@ PayItem = ttk.Combobox(#選擇支出類別
                 '其他'],
         width = 10
 )
-
 PayItem.current(0)#將支出類別預設為飲食
+
+TradeTypelbl = tk.Label(#交易方式標籤
+        window,
+        text = '交易方式',
+        bg = 'orange',
+        fg = 'black',
+        font = ('Arial', 12),
+        width = 30,
+        height = 2
+)
+TradeType = ttk.Combobox(#選擇交易方式
+        window,
+        values = [
+                '現金',
+                '信用卡',
+                '轉帳'],
+        width = 10
+)
+TradeType.current(0)#將交易方式預設為現金
+
+Currencylbl = tk.Label(#貨幣標籤
+        window,
+        text = '貨幣',
+        bg = '#59deff',
+        fg = 'black',
+        font = ('Arial', 12),
+        width = 30,
+        height = 2
+)
+currency = ttk.Combobox(#選擇貨幣
+        window,
+        values = [
+                '新台幣',
+                '美金',
+                '人民幣',
+                '日圓',
+                '歐元'],
+        width = 10
+)
+currency.current(0)#將貨幣預設為新台幣
+
 blank = tk.Label(#間隔
         window,
         width = 40,
@@ -153,20 +184,33 @@ Notelbl = tk.Label(#備註標籤
 note = tk.Entry(window, width = 20)
 
 
-cancel.grid(column=0, row=0)
+
+cancel.grid(column=0, row=0)#column為直欄，row為橫列
 pay.grid(column=1, row=0)
 income.grid(column=2, row=0)
 save.grid(column=3, row=0)
+
 AccountingWaylbl.grid(column=0, row=1, columnspan=1)
 AccountingWay.grid(column=1, row=1, columnspan=2)
+
 datelbl.grid(column=0, row=2, columnspan=1)
 date.grid(column=0, row=2, columnspan=4)
+
 Moneylbl.grid(column=0, row=3, columnspan=3)
 money.grid(column=3, row=3)
+
 ItemTypelbl.grid(column=0, row=4, columnspan=3)
 PayItem.grid(column=3, row=4)
-blank.grid(column=0, row=5, columnspan=4)
-Notelbl.grid(column=0, row=6)
-note.grid(column=1, row=6, columnspan=2)
+
+TradeTypelbl.grid(column=0, row=5, columnspan=3)
+TradeType.grid(column=3, row=5)
+
+Currencylbl.grid(column=0, row=6, columnspan=3)
+currency.grid(column=3, row=6)
+
+blank.grid(column=0, row=7, columnspan=4)
+
+Notelbl.grid(column=0, row=8)
+note.grid(column=1, row=8, columnspan=2)
 
 window.mainloop()
