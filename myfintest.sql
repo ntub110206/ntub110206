@@ -18,6 +18,36 @@ USE `myfin`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `account`
+--
+
+DROP TABLE IF EXISTS `account`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `account` (
+  `accounts_ID` int NOT NULL,
+  `accounts_Type` varchar(4) DEFAULT NULL,
+  `item_Type` varchar(10) DEFAULT NULL,
+  `date` date DEFAULT NULL,
+  `currency` varchar(10) DEFAULT NULL,
+  `user_ID` int DEFAULT NULL,
+  `money` decimal(9,3) DEFAULT NULL,
+  PRIMARY KEY (`accounts_ID`),
+  KEY `user_ID` (`user_ID`),
+  CONSTRAINT `account_ibfk_1` FOREIGN KEY (`user_ID`) REFERENCES `user` (`user_ID`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `account`
+--
+
+LOCK TABLES `account` WRITE;
+/*!40000 ALTER TABLE `account` DISABLE KEYS */;
+/*!40000 ALTER TABLE `account` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `user`
 --
 
@@ -51,4 +81,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-06-05 21:17:48
+-- Dump completed on 2022-06-06 20:44:51
