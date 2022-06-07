@@ -7,13 +7,24 @@ import time
 import calendar
 import mysql.connector
 
-connection = mysql.connector.connect(
+'''connection = mysql.connector.connect(
         host = 'localhost',
         port = '3305',
         user = 'root',
         password = '123456',
         database ='myfin'
 )
+
+cursor = connection.cursor()
+cursor.execute("INSERT INTO `account` VALUES()")
+cursor.execute("SHOW DATABASES;")
+records = cursor.fetchall()
+for r in records:
+        print(r)
+
+cursor.close()
+connection.commit()
+connection.close()'''
 
 def com():#確保金額輸入欄只能輸入數字
         buffer = 0
@@ -25,18 +36,7 @@ def com():#確保金額輸入欄只能輸入數字
         if buffer == 0:
                 messagebox.showinfo('成功','已儲存一筆支出')   
 
-def pay_event():#按下支出鍵會出現以下  
-        camera = tk.Button(#開啟文字識別
-                window,
-                text = '文字識別',
-                bg = '#00EC00',
-                fg = 'black',
-                font = ('Arial', 12),
-                width = 10,
-                height = 1
-        )
-        camera.grid(column=1, row=2, columnspan=2)
-
+def income_event():#按下收入鍵會出現以下       
         Moneylbl = tk.Label(#金額標籤
                 window,
                 text = '金額',
@@ -47,7 +47,7 @@ def pay_event():#按下支出鍵會出現以下
                 height = 2
         )
         Moneylbl.grid(column=0, row=3, columnspan=3)
-        global money
+        
         money = tk.Entry(#輸入金額
                 window,
                 width = 10
@@ -65,23 +65,17 @@ def pay_event():#按下支出鍵會出現以下
         )
         ItemTypelbl.grid(column=0, row=4, columnspan=3)
 
-        PayItem = ttk.Combobox(#選擇支出類別
+        PayItem = ttk.Combobox(#選擇收入類別
                 window,
                 values = [
-                        '飲食',
-                        '日常用品',
-                        '交通',
-                        '電信',
-                        '服飾',
-                        '娛樂',
-                        '文具用品',
-                        '醫療保健',
-                        '旅遊',
+                        '工資',
+                        '獎金',
+                        '投資',
                         '其他'],
                 width = 10,
                 state = 'readonly'
         )
-        PayItem.current(0)#將支出類別預設為飲食
+        PayItem.current(0)#將收入類別預設為工資
         PayItem.grid(column=3, row=4)
 
         TradeTypelbl = tk.Label(#交易方式標籤
@@ -99,7 +93,6 @@ def pay_event():#按下支出鍵會出現以下
                 window,
                 values = [
                         '現金',
-                        '信用卡',
                         '轉帳'],
                 width = 10,
                 state = 'readonly'
@@ -154,6 +147,7 @@ def pay_event():#按下支出鍵會出現以下
         note.grid(column=1, row=8, columnspan=2)        
 
 def pay_event():#按下支出鍵會出現以下  
+        global camera
         camera = tk.Button(#開啟文字識別
                 window,
                 text = '文字識別',
@@ -315,8 +309,9 @@ income = tk.Button(#收入鍵
         fg = 'white',
         font = ('Arial', 12),
         width = 10,
-        height = 2
-)
+        height = 2,
+        command=lambda: [income_event(), camera.grid_forget()]
+)#camera.grid_forget():在記錄收入時隱藏文字識別按鈕
 income.grid(column=2, row=0)
 
 save = tk.Button(#儲存鍵
