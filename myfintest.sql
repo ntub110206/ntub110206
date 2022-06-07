@@ -25,13 +25,14 @@ DROP TABLE IF EXISTS `account`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `account` (
-  `accounts_ID` int NOT NULL,
+  `accounts_ID` varchar(100) NOT NULL,
   `accounts_Type` varchar(4) DEFAULT NULL,
   `item_Type` varchar(10) DEFAULT NULL,
+  `trade_type` varchar(10) DEFAULT NULL,
   `date` date DEFAULT NULL,
   `currency` varchar(10) DEFAULT NULL,
-  `user_ID` int DEFAULT NULL,
   `money` decimal(9,3) DEFAULT NULL,
+  `user_ID` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`accounts_ID`),
   KEY `user_ID` (`user_ID`),
   CONSTRAINT `account_ibfk_1` FOREIGN KEY (`user_ID`) REFERENCES `user` (`user_ID`) ON DELETE SET NULL
@@ -55,8 +56,8 @@ DROP TABLE IF EXISTS `user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user` (
-  `user_ID` int NOT NULL,
-  `user_name` varchar(26) DEFAULT NULL,
+  `user_ID` varchar(100) NOT NULL,
+  `user_name` varchar(100) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
   `password` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`user_ID`)
@@ -81,4 +82,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-06-06 20:44:51
+-- Dump completed on 2022-06-07 14:57:07
