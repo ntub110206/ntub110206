@@ -33,6 +33,7 @@ CREATE TABLE `account` (
   `currency` varchar(10) DEFAULT NULL,
   `money` decimal(9,3) DEFAULT NULL,
   `user_ID` varchar(100) DEFAULT NULL,
+  `note` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`accounts_ID`),
   KEY `user_ID` (`user_ID`),
   CONSTRAINT `account_ibfk_1` FOREIGN KEY (`user_ID`) REFERENCES `user` (`user_ID`) ON DELETE SET NULL
@@ -82,4 +83,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-06-07 14:57:07
+-- Dump completed on 2022-06-07 22:13:29
