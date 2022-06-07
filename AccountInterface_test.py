@@ -1,3 +1,5 @@
+#from locale import currency
+from locale import currency
 import tkinter as tk
 #from tkinter import ttk
 import tkinter.ttk as ttk
@@ -7,36 +9,46 @@ import time
 import calendar
 import mysql.connector
 
-'''connection = mysql.connector.connect(
+connection = mysql.connector.connect(
         host = 'localhost',
         port = '3305',
         user = 'root',
         password = '123456',
         database ='myfin'
 )
-
 cursor = connection.cursor()
-cursor.execute("INSERT INTO `account` VALUES()")
-cursor.execute("SHOW DATABASES;")
-records = cursor.fetchall()
-for r in records:
-        print(r)
+account_ID = 0
+account_ID += 1
 
-cursor.close()
-connection.commit()
-connection.close()'''
-
-def com():#確保金額輸入欄只能輸入數字
+def PayCom():#確保支出金額輸入欄只能輸入數字
+        Pay = "支出"
         buffer = 0
         try:
-                Money = float(money.get())
+                Money = float(PayMoney.get())
+        except:
+                messagebox.showwarning('警告','金額請輸入數字')
+                buffer = 1
+        if buffer == 0:
+                messagebox.showinfo('成功','已儲存一筆支出')
+                cursor.execute("insert into `account` values('"+ str(account_ID) +"', '"+ Pay +"', '"+ PayItem.get() +"', '"+ PayTradeType.get()+ "', '"+ str(datetime.date.today()) +"', '"+ PayCurrency.get() +"', "+str(Money)+", 'Amy',null);")
+                cursor.close()
+                connection.commit()
+                connection.close()
+
+def IncomeCom():#確保收入金額輸入欄只能輸入數字
+        global Income
+        Income = "收入"
+        buffer = 0
+        try:
+                Money = float(IncomeMoney.get())
         except:
                 messagebox.showwarning('警告','金額請輸入數字')
                 buffer = 1
         if buffer == 0:
                 messagebox.showinfo('成功','已儲存一筆支出')   
 
-def income_event():#按下收入鍵會出現以下       
+def income_event():#按下收入鍵會出現以下
+        global IncomeMoney, IncomeItem, IncomeTradeType, IncomeCurrency, IncomeNote       
         Moneylbl = tk.Label(#金額標籤
                 window,
                 text = '金額',
@@ -48,11 +60,11 @@ def income_event():#按下收入鍵會出現以下
         )
         Moneylbl.grid(column=0, row=3, columnspan=3)
         
-        money = tk.Entry(#輸入金額
+        IncomeMoney = tk.Entry(#輸入金額
                 window,
                 width = 10
         )
-        money.grid(column=3, row=3)
+        IncomeMoney.grid(column=3, row=3)
     
         ItemTypelbl = tk.Label(#類別標籤
                 window,
@@ -65,7 +77,7 @@ def income_event():#按下收入鍵會出現以下
         )
         ItemTypelbl.grid(column=0, row=4, columnspan=3)
 
-        PayItem = ttk.Combobox(#選擇收入類別
+        IncomeItem = ttk.Combobox(#選擇收入類別
                 window,
                 values = [
                         '工資',
@@ -75,8 +87,8 @@ def income_event():#按下收入鍵會出現以下
                 width = 10,
                 state = 'readonly'
         )
-        PayItem.current(0)#將收入類別預設為工資
-        PayItem.grid(column=3, row=4)
+        IncomeItem.current(0)#將收入類別預設為工資
+        IncomeItem.grid(column=3, row=4)
 
         TradeTypelbl = tk.Label(#交易方式標籤
                 window,
@@ -89,7 +101,7 @@ def income_event():#按下收入鍵會出現以下
         )
         TradeTypelbl.grid(column=0, row=5, columnspan=3)
 
-        TradeType = ttk.Combobox(#選擇交易方式
+        IncomeTradeType = ttk.Combobox(#選擇交易方式
                 window,
                 values = [
                         '現金',
@@ -97,8 +109,8 @@ def income_event():#按下收入鍵會出現以下
                 width = 10,
                 state = 'readonly'
         )
-        TradeType.current(0)#將交易方式預設為現金
-        TradeType.grid(column=3, row=5)
+        IncomeTradeType.current(0)#將交易方式預設為現金
+        IncomeTradeType.grid(column=3, row=5)
 
         Currencylbl = tk.Label(#貨幣標籤
                 window,
@@ -111,7 +123,7 @@ def income_event():#按下收入鍵會出現以下
         )
         Currencylbl.grid(column=0, row=6, columnspan=3)
 
-        currency = ttk.Combobox(#選擇貨幣
+        IncomeCurrency = ttk.Combobox(#選擇貨幣
                 window,
                 values = [
                         '新台幣',
@@ -122,8 +134,8 @@ def income_event():#按下收入鍵會出現以下
                 width = 10,
                 state = 'readonly'
         )
-        currency.current(0)#將貨幣預設為新台幣
-        currency.grid(column=3, row=6)
+        IncomeCurrency.current(0)#將貨幣預設為新台幣
+        IncomeCurrency.grid(column=3, row=6)
 
         blank2 = tk.Label(#間隔
                 window,
@@ -143,11 +155,11 @@ def income_event():#按下收入鍵會出現以下
         )
         Notelbl.grid(column=0, row=8)
 
-        note = tk.Entry(window, width = 20)#撰寫記帳備註
-        note.grid(column=1, row=8, columnspan=2)        
+        IncomeNote = tk.Entry(window, width = 20)#撰寫記帳備註
+        IncomeNote.grid(column=1, row=8, columnspan=2)        
 
 def pay_event():#按下支出鍵會出現以下  
-        global camera
+        global camera, PayMoney, PayItem, PayTradeType, PayCurrency, PayNote
         camera = tk.Button(#開啟文字識別
                 window,
                 text = '文字識別',
@@ -169,12 +181,12 @@ def pay_event():#按下支出鍵會出現以下
                 height = 2
         )
         Moneylbl.grid(column=0, row=3, columnspan=3)
-        global money
-        money = tk.Entry(#輸入金額
+        
+        PayMoney = tk.Entry(#輸入金額
                 window,
                 width = 10
         )
-        money.grid(column=3, row=3)
+        PayMoney.grid(column=3, row=3)
     
         ItemTypelbl = tk.Label(#類別標籤
                 window,
@@ -217,7 +229,7 @@ def pay_event():#按下支出鍵會出現以下
         )
         TradeTypelbl.grid(column=0, row=5, columnspan=3)
 
-        TradeType = ttk.Combobox(#選擇交易方式
+        PayTradeType = ttk.Combobox(#選擇交易方式
                 window,
                 values = [
                         '現金',
@@ -226,8 +238,8 @@ def pay_event():#按下支出鍵會出現以下
                 width = 10,
                 state = 'readonly'
         )
-        TradeType.current(0)#將交易方式預設為現金
-        TradeType.grid(column=3, row=5)
+        PayTradeType.current(0)#將交易方式預設為現金
+        PayTradeType.grid(column=3, row=5)
 
         Currencylbl = tk.Label(#貨幣標籤
                 window,
@@ -240,7 +252,7 @@ def pay_event():#按下支出鍵會出現以下
         )
         Currencylbl.grid(column=0, row=6, columnspan=3)
 
-        currency = ttk.Combobox(#選擇貨幣
+        PayCurrency = ttk.Combobox(#選擇貨幣
                 window,
                 values = [
                         '新台幣',
@@ -251,8 +263,8 @@ def pay_event():#按下支出鍵會出現以下
                 width = 10,
                 state = 'readonly'
         )
-        currency.current(0)#將貨幣預設為新台幣
-        currency.grid(column=3, row=6)
+        PayCurrency.current(0)#將貨幣預設為新台幣
+        PayCurrency.grid(column=3, row=6)
 
         blank2 = tk.Label(#間隔
                 window,
@@ -272,8 +284,8 @@ def pay_event():#按下支出鍵會出現以下
         )
         Notelbl.grid(column=0, row=8)
 
-        note = tk.Entry(window, width = 20)#撰寫記帳備註
-        note.grid(column=1, row=8, columnspan=2)
+        PayNote = tk.Entry(window, width = 20)#撰寫記帳備註
+        PayNote.grid(column=1, row=8, columnspan=2)
 ##################################################
 
 window = tk.Tk()
@@ -310,7 +322,7 @@ income = tk.Button(#收入鍵
         font = ('Arial', 12),
         width = 10,
         height = 2,
-        command=lambda: [income_event(), camera.grid_forget()]
+        command = lambda: [income_event(), camera.grid_forget()]
 )#camera.grid_forget():在記錄收入時隱藏文字識別按鈕
 income.grid(column=2, row=0)
 
@@ -322,7 +334,7 @@ save = tk.Button(#儲存鍵
         font = ('Arial', 12),
         width = 10,
         height = 2,
-        command = com
+        command = lambda: [PayCom()]#IncomeCom()
 )
 save.grid(column=3, row=0)
 
@@ -353,3 +365,18 @@ blank1 = tk.Label(#間隔
 blank1.grid(column=0, row=2, columnspan=4)
 
 window.mainloop()
+
+
+
+
+
+
+
+#cursor.execute("INSERT INTO `account` VALUES("+ str(account_ID) + "," + PayItem.get() + "," + PayTradeType.get() + "," + datetime.date.today() + "," + PayCurrency.get() + "," + PayMoney.get() + ", 'Amy', 'null')")
+
+#cursor.execute("INSERT INTO `user` VALUES('Amy' ,'amyamy','amy@com','654321')")
+'''cursor.execute("SHOW DATABASES;")
+records = cursor.fetchall()
+for r in records:
+        print(r)'''
+
