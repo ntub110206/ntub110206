@@ -18,13 +18,17 @@ connection = mysql.connector.connect(
 )
 cursor = connection.cursor()
 
-accounts_ID = 9 ######
+cursor.execute('SELECT COUNT(*) FROM `account`;')
+records = cursor.fetchall()
+print(records)
+
+accounts_ID = 9  #要流水號
 accounts_ID += 1
-#起始直設為0，1代表支出，2代表收入
+
         
 
 def Com():
-        if accounts_Type == 1:
+        if accounts_Type == 1:   #1代表支出，2代表收入
                 Pay = "支出"
                 buffer = 0
                 try:
@@ -423,8 +427,5 @@ window.mainloop()
 #cursor.execute("INSERT INTO `account` VALUES("+ str(account_ID) + "," + PayItem.get() + "," + PayTradeType.get() + "," + datetime.date.today() + "," + PayCurrency.get() + "," + PayMoney.get() + ", 'Amy', 'null')")
 
 #cursor.execute("INSERT INTO `user` VALUES('Amy' ,'amyamy','amy@com','654321')")
-'''cursor.execute("SHOW DATABASES;")
-records = cursor.fetchall()
-for r in records:
-        print(r)'''
+
 
