@@ -1,8 +1,8 @@
-CREATE DATABASE  IF NOT EXISTS `myfin` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `myfin`;
+CREATE DATABASE  IF NOT EXISTS `111- MyFinGrasperDB` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `111- MyFinGrasperDB`;
 -- MySQL dump 10.13  Distrib 8.0.29, for Win64 (x86_64)
 --
--- Host: localhost    Database: myfin
+-- Host: localhost    Database: 111- MyFinGrasperDB
 -- ------------------------------------------------------
 -- Server version	8.0.29
 
