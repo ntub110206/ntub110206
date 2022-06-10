@@ -12,109 +12,71 @@ from locale import currency
 from PIL import Image
 from tkinter import messagebox, Label, filedialog
 
-def tesseract_total(filename):
-    global result
-    img_name = filename
-    img = Image.open(img_name)
-    text = pytesseract.image_to_string(img, lang='chi_tra+eng')
-    try:
-        cost = re.search(r'總計\s*:\s*(\d+)', text)
-        result = cost.group(1)
-    except AttributeError:
-        result = "not found"
-    if accounts_Type == 1:
-        PayMoney.insert(0,result)
-    elif accounts_Type == 2:
-        IncomeMoney.insert(0,result)
+def tesseract_total():#文字辨識事件
+        global result
+        file = tk.Tk()
+        file.withdraw()
+        file_path = filedialog.askopenfilename()
+        img_name = file_path
+        img = Image.open(img_name)
+        text = pytesseract.image_to_string(img, lang='chi_tra+eng')
+        try:
+                cost = re.search(r'總計\s*:\s*(\d+)', text)
+                result = cost.group(1)
+        except AttributeError:
+                result = "not found"
+        if accounts_Type == 1:
+                PayMoney.insert(0,result)
+        elif accounts_Type == 2:
+                IncomeMoney.insert(0,result)
 
-def file_loading():
-    file = tk.Tk()
-    file.withdraw()
-    file_path = filedialog.askopenfilename()
-    txt = tesseract_total(file_path)
-
-
-
-connection = mysql.connector.connect(
-             host = '140.131.114.242',
-             port = '3306',
-             user = 'MyFinGrasper',
-             password = 'FGDB_Pass@111',
-             database ='111- MyFinGrasperDB'
-)
-cursor = connection.cursor()
-
-cursor.execute('SELECT COUNT(*) FROM `account`;')
-records = cursor.fetchall()
-a = str(records).split('(')
-b = a[1].split(',')
-print(b[0])
-
-accounts_ID = int(b[0])  #要流水號
-accounts_ID += 1
-
-def Com():
+def Com():#儲存按鈕事件
+        check = 0
         if accounts_Type == 1:   #1代表支出，2代表收入
                 Pay = "支出"
-                buffer = 0
                 try:
                         Money = float(PayMoney.get())
                 except:
                         messagebox.showwarning('警告','金額請輸入數字')
-                        buffer = 1
-                if buffer == 0:
+                        check = 1
+                if check == 0:
                         messagebox.showinfo('成功','已儲存一筆支出')
-                        cursor.execute("insert into `account` values('"+ str(accounts_ID) +"', '"+ Pay +"', '"+ PayItem.get() +"', '"+ PayTradeType.get()+ "', '"+ str(datetime.date.today()) +"', '"+ PayCurrency.get() +"', "+str(Money)+", 'Amy','"+ PayNote.get() +"');")
+                        cursor.execute("insert into `account` values('"+ str(accounts_ID)           +"', '"
+                                                                       + Pay                        +"', '"
+                                                                       + PayItem.get()              +"', '"
+                                                                       + PayTradeType.get()         + "', '"
+                                                                       + str(datetime.date.today()) +"', '"
+                                                                       + PayCurrency.get()          +"', "
+                                                                       + str(Money)                 +", 'Amy','"
+                                                                       + PayNote.get()              +"');"
+                                                                       )
                         cursor.close()
                         connection.commit()
                         connection.close()
 
         elif accounts_Type == 2:
                 Income = "收入"
-                buffer = 0
                 try:
                         Money = float(IncomeMoney.get())
                 except:
                         messagebox.showwarning('警告','金額請輸入數字')
-                        buffer = 1
-                if buffer == 0:
+                        check = 1
+                if check == 0:
                         messagebox.showinfo('成功','已儲存一筆收入')
-                        cursor.execute("insert into `account` values('"+ str(accounts_ID) +"', '"+ Income +"', '"+ IncomeItem.get() +"', '"+ IncomeTradeType.get()+ "', '"+ str(datetime.date.today()) +"', '"+ IncomeCurrency.get() +"', "+str(Money)+", 'Amy','"+ IncomeNote.get() +"');")
+                        cursor.execute("insert into `account` values('"+ str(accounts_ID)           +"', '"
+                                                                       + Income                     +"', '"
+                                                                       + IncomeItem.get()           +"', '"
+                                                                       + IncomeTradeType.get()      + "', '"
+                                                                       + str(datetime.date.today()) +"', '"
+                                                                       + IncomeCurrency.get()       +"', "
+                                                                       +str(Money)                  +", 'Amy','"
+                                                                       + IncomeNote.get()           +"');"
+                                                                       )
                         cursor.close()
                         connection.commit()
                         connection.close()
-
-'''def PayCom():#確保支出金額輸入欄只能輸入數字
-        Pay = "支出"
-        buffer = 0
-        try:
-                Money = float(PayMoney.get())
-        except:
-                messagebox.showwarning('警告','金額請輸入數字')
-                buffer = 1
-        if buffer == 0:
-                messagebox.showinfo('成功','已儲存一筆支出')
-                cursor.execute("insert into `account` values('"+ str(accounts_ID) +"', '"+ Pay +"', '"+ PayItem.get() +"', '"+ PayTradeType.get()+ "', '"+ str(datetime.date.today()) +"', '"+ PayCurrency.get() +"', "+str(Money)+", 'Amy',null);")
-                cursor.close()
-                connection.commit()
-                connection.close()
-
-def IncomeCom():#確保收入金額輸入欄只能輸入數字
-        Income = "收入"
-        buffer = 0
-        try:
-                Money = float(IncomeMoney.get())
-        except:
-                messagebox.showwarning('警告','金額請輸入數字')
-                buffer = 1
-        if buffer == 0:
-                messagebox.showinfo('成功','已儲存一筆支出')
-                cursor.execute("insert into `account` values('"+ str(accounts_ID) +"', '"+ Income +"', '"+ IncomeItem.get() +"', '"+ IncomeTradeType.get()+ "', '"+ str(datetime.date.today()) +"', '"+ IncomeCurrency.get() +"', "+str(Money)+", 'Amy',null);")
-                cursor.close()
-                connection.commit()
-                connection.close()'''  
  
-def pay_event():#按下支出鍵會出現以下
+def pay_event():#支出按鈕事件
         global camera, PayMoney, PayItem, PayTradeType, PayCurrency, PayNote, accounts_Type
         accounts_Type = 1
         camera = tk.Button(#開啟文字識別
@@ -125,7 +87,7 @@ def pay_event():#按下支出鍵會出現以下
                 font = ('Arial', 12),
                 width = 10,
                 height = 1,
-                command = file_loading
+                command = tesseract_total
         )
         camera.grid(column=1, row=2, columnspan=2)
 
@@ -159,19 +121,19 @@ def pay_event():#按下支出鍵會出現以下
 
         PayItem = ttk.Combobox(#選擇支出類別
                 window,
-                values = [
-                        '飲食',
-                        '日常用品',
-                        '交通',
-                        '電信',
-                        '服飾',
-                        '娛樂',
-                        '文具用品',
-                        '醫療保健',
-                        '旅遊',
-                        '其他'],
                 width = 10,
-                state = 'readonly'
+                state = 'readonly',
+                values = [
+                          '飲食',
+                          '日常用品',
+                          '交通',
+                          '電信',
+                          '服飾',
+                          '娛樂',
+                          '文具用品',
+                          '醫療保健',
+                          '旅遊',
+                          '其他']
         )
         PayItem.current(0)#將支出類別預設為飲食
         PayItem.grid(column=3, row=4)
@@ -189,12 +151,12 @@ def pay_event():#按下支出鍵會出現以下
 
         PayTradeType = ttk.Combobox(#選擇交易方式
                 window,
-                values = [
-                        '現金',
-                        '信用卡',
-                        '轉帳'],
                 width = 10,
-                state = 'readonly'
+                state = 'readonly',
+                values = [
+                          '現金',
+                          '信用卡',
+                          '轉帳']
         )
         PayTradeType.current(0)#將交易方式預設為現金
         PayTradeType.grid(column=3, row=5)
@@ -212,14 +174,14 @@ def pay_event():#按下支出鍵會出現以下
 
         PayCurrency = ttk.Combobox(#選擇貨幣
                 window,
-                values = [
-                        '新台幣',
-                        '美金',
-                        '人民幣',
-                        '日圓',
-                        '歐元'],
                 width = 10,
-                state = 'readonly'
+                state = 'readonly',
+                values = [
+                          '新台幣',
+                          '美金',
+                          '人民幣',
+                          '日圓',
+                          '歐元']
         )
         PayCurrency.current(0)#將貨幣預設為新台幣
         PayCurrency.grid(column=3, row=6)
@@ -245,7 +207,7 @@ def pay_event():#按下支出鍵會出現以下
         PayNote = tk.Entry(window, width = 20)#撰寫記帳備註
         PayNote.grid(column=1, row=8, columnspan=2)
 
-def income_event():#按下收入鍵會出現以下
+def income_event():#收入按鈕事件
         global IncomeMoney, IncomeItem, IncomeTradeType, IncomeCurrency, IncomeNote, accounts_Type
         accounts_Type = 2
         blank3 = tk.Label(#開啟文字識別
@@ -285,13 +247,13 @@ def income_event():#按下收入鍵會出現以下
 
         IncomeItem = ttk.Combobox(#選擇收入類別
                 window,
-                values = [
-                        '工資',
-                        '獎金',
-                        '投資',
-                        '其他'],
                 width = 10,
-                state = 'readonly'
+                state = 'readonly',
+                values = [
+                          '工資',
+                          '獎金',
+                          '投資',
+                          '其他']
         )
         IncomeItem.current(0)#將收入類別預設為工資
         IncomeItem.grid(column=3, row=4)
@@ -309,11 +271,11 @@ def income_event():#按下收入鍵會出現以下
 
         IncomeTradeType = ttk.Combobox(#選擇交易方式
                 window,
-                values = [
-                        '現金',
-                        '轉帳'],
                 width = 10,
-                state = 'readonly'
+                state = 'readonly',
+                values = [
+                          '現金',
+                          '轉帳']
         )
         IncomeTradeType.current(0)#將交易方式預設為現金
         IncomeTradeType.grid(column=3, row=5)
@@ -331,14 +293,14 @@ def income_event():#按下收入鍵會出現以下
 
         IncomeCurrency = ttk.Combobox(#選擇貨幣
                 window,
-                values = [
-                        '新台幣',
-                        '美金',
-                        '人民幣',
-                        '日圓',
-                        '歐元'],
                 width = 10,
-                state = 'readonly'
+                state = 'readonly',
+                values = [
+                          '新台幣',
+                          '美金',
+                          '人民幣',
+                          '日圓',
+                          '歐元']
         )
         IncomeCurrency.current(0)#將貨幣預設為新台幣
         IncomeCurrency.grid(column=3, row=6)
@@ -365,7 +327,27 @@ def income_event():#按下收入鍵會出現以下
         IncomeNote.grid(column=1, row=8, columnspan=2)        
 
 
-##################################################
+##################################################################
+
+connection = mysql.connector.connect(
+             host = '140.131.114.242',
+             port = '3306',
+             user = 'MyFinGrasper',
+             password = 'FGDB_Pass@111',
+             database ='111- MyFinGrasperDB'
+)
+cursor = connection.cursor()
+
+cursor.execute('SELECT COUNT(*) FROM `account`;')
+records = cursor.fetchall()         #[(0,)]
+countList = str(records).split('(') #['[','0,)]']
+count = countList[1].split(',')     #['0',')]']
+print(count[0])                     # 0
+
+accounts_ID = int(count[0])  #要流水號
+accounts_ID += 1
+
+##################################################################
 
 window = tk.Tk()
 window.title('記帳表單')
@@ -377,7 +359,8 @@ cancel = tk.Button(#取消鍵
         fg = 'white',
         font = ('Arial', 12),
         width = 10,
-        height = 2
+        height = 2,
+        command=quit
 )
 cancel.grid(column=0, row=0)#column為直欄，row為橫列
 
@@ -444,20 +427,3 @@ blank1 = tk.Label(#間隔
 blank1.grid(column=0, row=2, columnspan=4)
 
 window.mainloop()
-
-
-
-'''
-accountUI = tk.Tk()
-accountUI.title('記帳表單')
-accountUI.geometry('400x600')
-
-file = tk.Tk()
-file.withdraw()
-file_path = filedialog.askopenfilename()
-txt = tesseract_total(file_path)
-tk.Label(accountUI, bg='blue', fg='white', text=txt, font=('Arial', 18), width="30", height="5").pack()
-tk.Button(accountUI, text="退出", font=('Arial', 18), width="30", height="5", command=quit).pack()
-
-accountUI.mainloop()
-'''
