@@ -38,6 +38,7 @@ def Com():#儲存按鈕事件
                         Money = float(PayMoney.get())
                 except:
                         messagebox.showwarning('警告','金額請輸入數字')
+                        PayMoney.delete(0,'end')
                         check = 1
                 if check == 0:
                         messagebox.showinfo('成功','已儲存一筆支出')
@@ -53,6 +54,7 @@ def Com():#儲存按鈕事件
                         cursor.close()
                         connection.commit()
                         connection.close()
+                        quit()
 
         elif accounts_Type == 2:
                 Income = "收入"
@@ -60,6 +62,7 @@ def Com():#儲存按鈕事件
                         Money = float(IncomeMoney.get())
                 except:
                         messagebox.showwarning('警告','金額請輸入數字')
+                        IncomeMoney.delete(0,'end')
                         check = 1
                 if check == 0:
                         messagebox.showinfo('成功','已儲存一筆收入')
@@ -69,12 +72,15 @@ def Com():#儲存按鈕事件
                                                                        + IncomeTradeType.get()      + "', '"
                                                                        + str(datetime.date.today()) +"', '"
                                                                        + IncomeCurrency.get()       +"', "
-                                                                       +str(Money)                  +", 'Amy','"
+                                                                       + str(Money)                  +", 'Amy','"
                                                                        + IncomeNote.get()           +"');"
                                                                        )
                         cursor.close()
                         connection.commit()
                         connection.close()
+                        quit()
+        else:
+                messagebox.showwarning('警告','請選擇記帳類別')
  
 def pay_event():#支出按鈕事件
         global camera, PayMoney, PayItem, PayTradeType, PayCurrency, PayNote, accounts_Type
@@ -342,10 +348,12 @@ cursor.execute('SELECT COUNT(*) FROM `account`;')
 records = cursor.fetchall()         #[(0,)]
 countList = str(records).split('(') #['[','0,)]']
 count = countList[1].split(',')     #['0',')]']
-print(count[0])                     # 0
+#print(count[0])                     # 0
 
-accounts_ID = int(count[0])  #要流水號
+accounts_ID = int(count[0])  
 accounts_ID += 1
+
+accounts_Type = 0 #初值設定
 
 ##################################################################
 
@@ -396,7 +404,7 @@ save = tk.Button(#儲存鍵
         font = ('Arial', 12),
         width = 10,
         height = 2,
-        command = lambda: [Com(), quit()] #IncomeCom()
+        command = Com #IncomeCom()
 )
 save.grid(column=3, row=0)
 
@@ -418,7 +426,7 @@ date = tk.Entry(#選擇的日期
 date.insert(0,datetime.date.today())
 date.config(state = 'readonly')
 date.grid(column=0, row=1, columnspan=4)
-print(datetime.date.today())
+#print(datetime.date.today())
 blank1 = tk.Label(#間隔
         window,
         width = 40,
