@@ -9,8 +9,8 @@ app = Flask(__name__)
 def hello():
     return "Hello friend!"
 
-@app.route("/cost",methods=['POST'])
-def budgetCalculate():
+@app.route("/add",methods=['POST'])
+def add():
     if(not len(firebase_admin._apps)):
         # 引用私密金鑰
         cred = credentials.Certificate('./serviceAccount.json')
@@ -19,20 +19,107 @@ def budgetCalculate():
     # 初始化firestore
     db = firestore.client()
 
-    #取得前端資訊(uid,帳目總價)
+    #取得前端資訊(uid,帳目總價,交易項目)
     uid = request.values['uid']
     money = int(request.values['money'])
+    title = request.values['payType']
+    print(title)
     # 取得資產總額
     doc_budgetRef = db.collection("users").document(uid)
     doc_snap = doc_budgetRef.get()
     budget = int(doc_snap.get('budget'))
     #計算記帳後資產
-    budget -= money
+    if(title == "額外收入"):
+        budget += money
+    else:
+        budget -= money
     #更新資料庫
     doc = {'budget':budget}
     doc_budgetRef.update(doc)
     #回傳至前端
     return str(budget)
+
+@app.route("/del",methods=['POST'])
+def remove():
+    if(not len(firebase_admin._apps)):
+        # 引用私密金鑰
+        cred = credentials.Certificate('./serviceAccount.json')
+        # 初始化firebase，注意不能重複初始化
+        firebase_admin.initialize_app(cred)
+    # 初始化firestore
+    db = firestore.client()
+    # 取得前端資訊(uid,帳目金額,帳目大項)
+    uid = request.values['uid']
+    money = request.values['money']
+    title = request.values['title']
+    # 取得資產總額
+    doc_budgetRef = db.collection("users").document(uid)
+    doc_Bsnap = doc_budgetRef.get()
+    budget = int(doc_Bsnap.get('budget'))
+    #計算帳物刪除後資產
+    if(title == "額外收入"):
+        budget -= int(money)
+    else:
+        budget += int(money)
+    #更新資料庫
+    doc = {'budget':budget}
+    doc_budgetRef.update(doc)
+
+    return ""
+
+@app.route("/update",methods=['POST'])
+def update():
+    money = 0
+    if(not len(firebase_admin._apps)):
+        # 引用私密金鑰
+        cred = credentials.Certificate('./serviceAccount.json')
+        # 初始化firebase，注意不能重複初始化
+        firebase_admin.initialize_app(cred)
+    # 初始化firestore
+    db = firestore.client()
+    # 取得前端資訊(uid,aid)
+    uid = request.values['uid']
+    aid = request.values['aid']
+    # 取得更改前帳目金額
+    doc_accountRef = db.collection("users").document(uid).collection("dataArray").document(aid)
+    doc_Asnap = doc_accountRef.get()
+    beforeMoney = int(doc_Asnap.get('money'))
+    # 取得更改前帳目大項
+    beforeTitle = doc_Asnap.get('tradeType')
+    print(beforeTitle)
+    # 取得前端資訊(更改後帳目金額,更改後帳目大項)
+    afterMoney = int(request.values['money'])
+    afterTitle = request.values['title']
+    print(afterTitle)
+    # 取得資產總額
+    doc_budgetRef = db.collection("users").document(uid)
+    doc_Bsnap = doc_budgetRef.get()
+    budget = int(doc_Bsnap.get('budget'))
+    if(beforeTitle != "額外收入" and afterTitle == "額外收入"):
+        money = beforeMoney + afterMoney
+        budget += money
+    elif(beforeTitle == "額外收入" and afterTitle != "額外收入"):
+        money = beforeMoney + afterMoney
+        budget -= money
+    elif(beforeTitle == "額外收入" and afterTitle == "額外收入"):
+        if(beforeMoney > afterMoney):
+            money = int(beforeMoney) - afterMoney
+            budget -= money
+        elif(beforeMoney < afterMoney):
+            money = afterMoney - int(beforeMoney)
+            budget += money
+    else:
+        if(beforeMoney > afterMoney):
+            money = beforeMoney - afterMoney
+            budget += money
+        elif(beforeMoney < afterMoney):
+            money = afterMoney - beforeMoney
+            budget -= money
+    #更新資料庫
+    doc = {'budget':budget}
+    doc_budgetRef.update(doc)
+
+    return ""
 
 @app.route("/total",methods=['POST'])
 def total():
