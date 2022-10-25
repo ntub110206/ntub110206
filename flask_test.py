@@ -9,8 +9,8 @@ app = Flask(__name__)
 def hello():
     return "Hello friend!"
 
-@app.route("/add",methods=['POST'])
-def add():
+@app.route("/budgetAdd",methods=['POST'])
+def budgetAdd():
     if(not len(firebase_admin._apps)):
         # 引用私密金鑰
         cred = credentials.Certificate('./serviceAccount.json')
@@ -39,8 +39,8 @@ def add():
     #回傳至前端
     return str(budget)
 
-@app.route("/del",methods=['POST'])
-def remove():
+@app.route("/budgetDel",methods=['POST'])
+def budgetDel():
     if(not len(firebase_admin._apps)):
         # 引用私密金鑰
         cred = credentials.Certificate('./serviceAccount.json')
@@ -67,8 +67,8 @@ def remove():
 
     return ""
 
-@app.route("/update",methods=['POST'])
-def update():
+@app.route("/budgetUpdate",methods=['POST'])
+def budgetUpdate():
     money = 0
     if(not len(firebase_admin._apps)):
         # 引用私密金鑰
@@ -120,6 +120,52 @@ def update():
     doc_budgetRef.update(doc)
 
     return ""
+
+@app.route("/add",methods=['POST'])
+def add():
+    if(not len(firebase_admin._apps)):
+        # 引用私密金鑰
+        cred = credentials.Certificate('./serviceAccount.json')
+        # 初始化firebase，注意不能重複初始化
+        firebase_admin.initialize_app(cred)
+    # 初始化firestore
+    db = firestore.client()
+    # 取得前端資訊(uid,帳目資訊)
+    uid = request.values['uid']
+    date = request.values['date']
+    year = request.values['year']
+    month = request.values['month']
+    data = request.values['data']
+    tradeType = request.values['title']
+    detail = request.values['detail']
+    money = int(request.values['money'])
+    #格式
+    doc = {
+        'date':date,
+        'year':year,
+        'month':month,
+        'data':data,
+        'tradeType':tradeType,
+        'detail':detail,
+        'money':money,
+    }
+    # 寫入
+    db.collection("users").document(uid).collection("dataArray").add(doc)
+
+    # 取得資產總額
+    doc_budgetRef = db.collection("users").document(uid)
+    doc_snap = doc_budgetRef.get()
+    budget = int(doc_snap.get('budget'))
+    #計算記帳後資產
+    if(tradeType == "額外收入"):
+        budget += money
+    else:
+        budget -= money
+    #更新資料庫
+    doc = {'budget':budget}
+    doc_budgetRef.update(doc)
+    #回傳至前端
+    return str(budget)
 
 @app.route("/total",methods=['POST'])
 def total():
