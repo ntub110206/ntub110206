@@ -150,7 +150,7 @@ def add():
         'money':money,
     }
     # 寫入
-    db.collection("users").document(uid).collection("dataArray").add(doc)
+    doc_Asnap = db.collection("users").document(uid).collection("dataArray").add(doc)
 
     # 取得資產總額
     doc_budgetRef = db.collection("users").document(uid)
@@ -165,7 +165,7 @@ def add():
     doc = {'budget':budget}
     doc_budgetRef.update(doc)
     #回傳至前端
-    return str(budget)
+    return f'{doc_Asnap[1].id},{budget}'
 
 @app.route("/total",methods=['POST'])
 def total():
@@ -203,7 +203,7 @@ def total():
     proportion = selectTotal/costTotal*100
 
     #回傳至前端
-    return [costTotal, selectTotal, proportion]
+    return f'{costTotal},{selectTotal},{proportion}'
 
 @app.route("/get",methods=['POST'])
 def get():
