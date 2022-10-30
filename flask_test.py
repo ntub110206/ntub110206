@@ -231,9 +231,9 @@ def get():
     doc_costRef = doc_ref.stream()
     # 取得支出，並計算該月總支出
     for doc in doc_costRef:
-        if doc.get('tradeType') != "額外收入" and doc.get('month') == datetime.datetime.now().month:
+        if doc.get('tradeType') != "額外收入" and int(doc.get('month')) == datetime.datetime.now().month:
             costTotal += int(doc.get('money'))
-        elif doc.get('tradeType') == "額外收入" and doc.get('month') == datetime.datetime.now().month:
+        elif doc.get('tradeType') == "額外收入" and int(doc.get('month')) == datetime.datetime.now().month:
             incomeTotal += int(doc.get('money'))
     
     #回傳至前端
