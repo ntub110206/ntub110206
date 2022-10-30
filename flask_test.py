@@ -11,7 +11,7 @@ def hello():
 
 @app.route("/budgetAdd",methods=['POST'])
 def budgetAdd():
-    if(not len(firebase_admin._apps)):
+    if not len(firebase_admin._apps):
         # 引用私密金鑰
         cred = credentials.Certificate('./serviceAccount.json')
         # 初始化firebase，注意不能重複初始化
@@ -29,7 +29,7 @@ def budgetAdd():
     doc_snap = doc_budgetRef.get()
     budget = int(doc_snap.get('budget'))
     #計算記帳後資產
-    if(title == "額外收入"):
+    if title == "額外收入":
         budget += money
     else:
         budget -= money
@@ -41,7 +41,7 @@ def budgetAdd():
 
 @app.route("/budgetDel",methods=['POST'])
 def budgetDel():
-    if(not len(firebase_admin._apps)):
+    if not len(firebase_admin._apps):
         # 引用私密金鑰
         cred = credentials.Certificate('./serviceAccount.json')
         # 初始化firebase，注意不能重複初始化
@@ -57,7 +57,7 @@ def budgetDel():
     doc_Bsnap = doc_budgetRef.get()
     budget = int(doc_Bsnap.get('budget'))
     #計算帳物刪除後資產
-    if(title == "額外收入"):
+    if title == "額外收入":
         budget -= int(money)
     else:
         budget += int(money)
@@ -70,7 +70,7 @@ def budgetDel():
 @app.route("/budgetUpdate",methods=['POST'])
 def budgetUpdate():
     money = 0
-    if(not len(firebase_admin._apps)):
+    if not len(firebase_admin._apps):
         # 引用私密金鑰
         cred = credentials.Certificate('./serviceAccount.json')
         # 初始化firebase，注意不能重複初始化
@@ -95,24 +95,24 @@ def budgetUpdate():
     doc_budgetRef = db.collection("users").document(uid)
     doc_Bsnap = doc_budgetRef.get()
     budget = int(doc_Bsnap.get('budget'))
-    if(beforeTitle != "額外收入" and afterTitle == "額外收入"):
+    if beforeTitle != "額外收入" and afterTitle == "額外收入":
         money = beforeMoney + afterMoney
         budget += money
-    elif(beforeTitle == "額外收入" and afterTitle != "額外收入"):
+    elif beforeTitle == "額外收入" and afterTitle != "額外收入":
         money = beforeMoney + afterMoney
         budget -= money
-    elif(beforeTitle == "額外收入" and afterTitle == "額外收入"):
-        if(beforeMoney > afterMoney):
+    elif beforeTitle == "額外收入" and afterTitle == "額外收入":
+        if beforeMoney > afterMoney:
             money = int(beforeMoney) - afterMoney
             budget -= money
-        elif(beforeMoney < afterMoney):
+        elif beforeMoney < afterMoney:
             money = afterMoney - int(beforeMoney)
             budget += money
     else:
-        if(beforeMoney > afterMoney):
+        if beforeMoney > afterMoney:
             money = beforeMoney - afterMoney
             budget += money
-        elif(beforeMoney < afterMoney):
+        elif beforeMoney < afterMoney:
             money = afterMoney - beforeMoney
             budget -= money
     #更新資料庫
@@ -123,7 +123,7 @@ def budgetUpdate():
 
 @app.route("/add",methods=['POST'])
 def add():
-    if(not len(firebase_admin._apps)):
+    if not len(firebase_admin._apps):
         # 引用私密金鑰
         cred = credentials.Certificate('./serviceAccount.json')
         # 初始化firebase，注意不能重複初始化
@@ -157,7 +157,7 @@ def add():
     doc_snap = doc_budgetRef.get()
     budget = int(doc_snap.get('budget'))
     #計算記帳後資產
-    if(tradeType == "額外收入"):
+    if tradeType == "額外收入":
         budget += money
     else:
         budget -= money
@@ -171,7 +171,7 @@ def add():
 def total():
     costTotal = 0
     selectTotal = 0
-    if(not len(firebase_admin._apps)):
+    if not len(firebase_admin._apps):
         # 引用私密金鑰
         cred = credentials.Certificate('./serviceAccount.json')
         # 初始化firebase，注意不能重複初始化
@@ -208,7 +208,8 @@ def total():
 @app.route("/get",methods=['POST'])
 def get():
     costTotal = 0
-    if(not len(firebase_admin._apps)):
+    incomeTotal = 0
+    if not len(firebase_admin._apps):
         # 引用私密金鑰
         cred = credentials.Certificate('./serviceAccount.json')
         # 初始化firebase，注意不能重複初始化
@@ -232,6 +233,8 @@ def get():
     for doc in doc_costRef:
         if doc.get('tradeType') != "額外收入" and doc.get('month') == datetime.datetime.now().month:
             costTotal += doc.get('money')
+        elif doc.get('tradeType') != "額外收入" and doc.get('month') == datetime.datetime.now().month:
+            incomeTotal += doc.get('money')
     
     #回傳至前端
     return f'{budget},{costTotal}'
