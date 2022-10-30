@@ -233,11 +233,11 @@ def get():
     for doc in doc_costRef:
         if doc.get('tradeType') != "額外收入" and doc.get('month') == datetime.datetime.now().month:
             costTotal += doc.get('money')
-        elif doc.get('tradeType') != "額外收入" and doc.get('month') == datetime.datetime.now().month:
+        elif doc.get('tradeType') == "額外收入" and doc.get('month') == datetime.datetime.now().month:
             incomeTotal += doc.get('money')
     
     #回傳至前端
-    return f'{budget},{costTotal}'
+    return f'{budget},{incomeTotal},{costTotal}'
 
 if __name__ == '__main__':
     app.debug = True
