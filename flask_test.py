@@ -222,15 +222,20 @@ def get():
     uid = request.values['uid']
 
     # 指向用戶資料
-    doc_budgetRef = db.collection("users").document(uid)
+    doc_userRef = db.collection("users").document(uid).get()
+    # 取得帳號
+    user = doc_userRef.get('user')
+    # 取得暱稱
+    name = doc_userRef.get('name')
+    # 取得職稱
+    profession = doc_userRef.get('profession')
     # 取得資產總額
-    doc_snap = doc_budgetRef.get()
-    budget = int(doc_snap.get('budget'))
+    budget = int(doc_userRef.get('budget'))
 
     # 指向帳務資料
-    doc_ref = db.collection("users").document(uid).collection("dataArray")
+    doc_accountRef = db.collection("users").document(uid).collection("dataArray")
     # 查詢所有文件
-    doc_costRef = doc_ref.stream()
+    doc_costRef = doc_accountRef.stream()
     # 取得支出，並計算該月總支出、總收入
     for doc in doc_costRef:
         if doc.get('tradeType') != "額外收入" and int(doc.get('month')) == datetime.datetime.now().month:
@@ -247,7 +252,7 @@ def get():
     targetMoney = shoppingTotal - budget
 
     # 回傳至前端
-    return f'{budget},{salaryTotal},{costTotal},{shoppingTotal},{targetMoney}'
+    return f'{user},{name},{profession},{budget},{salaryTotal},{costTotal},{shoppingTotal},{targetMoney}'
 
 if __name__ == '__main__':
     app.debug = True
