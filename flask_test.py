@@ -23,7 +23,6 @@ def budgetAdd():
     uid = request.values['uid']
     money = int(request.values['money'])
     title = request.values['payType']
-    # print(title)
     # 取得資產總額
     doc_budgetRef = db.collection("users").document(uid)
     doc_snap = doc_budgetRef.get()
@@ -86,11 +85,9 @@ def budgetUpdate():
     beforeMoney = int(doc_Asnap.get('money'))
     # 取得更改前帳目大項
     beforeTitle = doc_Asnap.get('tradeType')
-    # print(beforeTitle)
     # 取得前端資訊(更改後帳目金額,更改後帳目大項)
     afterMoney = int(request.values['money'])
     afterTitle = request.values['title']
-    # print(afterTitle)
     # 取得資產總額
     doc_budgetRef = db.collection("users").document(uid)
     doc_Bsnap = doc_budgetRef.get()
@@ -151,6 +148,7 @@ def add():
     }
     # 寫入
     doc_Asnap = db.collection("users").document(uid).collection("dataArray").add(doc)
+    aid = doc_Asnap[1].id
 
     # 取得資產總額
     doc_budgetRef = db.collection("users").document(uid)
@@ -165,7 +163,81 @@ def add():
     doc = {'budget':budget}
     doc_budgetRef.update(doc)
     # 回傳至前端
-    return f'{doc_Asnap[1].id},{budget}'
+    return f'{aid},{budget}'
+
+@app.route("/update",methods=['POST'])
+def update():
+    money = 0
+    if not len(firebase_admin._apps):
+        # 引用私密金鑰
+        cred = credentials.Certificate('./serviceAccount.json')
+        # 初始化firebase，注意不能重複初始化
+        firebase_admin.initialize_app(cred)
+    # 初始化firestore
+    db = firestore.client()
+    # 取得前端資訊(uid,帳目資訊)
+    uid = request.values['uid']
+    aid = request.values['aid']
+    date = request.values['date']
+    year = request.values['year']
+    month = request.values['month']
+    data = request.values['data']
+    afterTitle = request.values['title']
+    detail = request.values['detail']
+    afterMoney = int(request.values['money'])
+
+# 取得資產總額
+    doc_budgetRef = db.collection("users").document(uid)
+    doc_snap = doc_budgetRef.get()
+    budget = int(doc_snap.get('budget'))
+
+    # 取得更改前帳目金額
+    doc_accountRef = db.collection("users").document(uid).collection("dataArray").document(aid)
+    doc_Asnap = doc_accountRef.get()
+    beforeMoney = int(doc_Asnap.get('money'))
+    # 取得更改前帳目大項
+    beforeTitle = doc_Asnap.get('tradeType')
+
+    # 計算帳務變更後資產
+    if beforeTitle != "額外收入" and afterTitle == "額外收入":
+        money = beforeMoney + afterMoney
+        budget += money
+    elif beforeTitle == "額外收入" and afterTitle != "額外收入":
+        money = beforeMoney + afterMoney
+        budget -= money
+    elif beforeTitle == "額外收入" and afterTitle == "額外收入":
+        if beforeMoney > afterMoney:
+            money = int(beforeMoney) - afterMoney
+            budget -= money
+        elif beforeMoney < afterMoney:
+            money = afterMoney - int(beforeMoney)
+            budget += money
+    else:
+        if beforeMoney > afterMoney:
+            money = beforeMoney - afterMoney
+            budget += money
+        elif beforeMoney < afterMoney:
+            money = afterMoney - beforeMoney
+            budget -= money
+
+    # 格式
+    docA = {
+        'date':date,
+        'year':year,
+        'month':month,
+        'data':data,
+        'tradeType':afterTitle,
+        'detail':detail,
+        'money':afterMoney,
+    }
+    # 寫入
+    db.collection("users").document(uid).collection("dataArray").document(aid).set(docA)
+    
+    # 更新資料庫
+    docB = {'budget':budget}
+    doc_budgetRef.update(docB)
+    # 回傳至前端
+    return f'{aid},{budget}'
 
 @app.route("/total",methods=['POST'])
 def total():
