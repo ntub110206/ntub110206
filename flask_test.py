@@ -290,6 +290,7 @@ def getInfo():
     costTotal = 0
     salaryTotal = 0
     sarplus = 0
+    status = False
 
     if not len(firebase_admin._apps):
         # 引用私密金鑰
@@ -337,6 +338,7 @@ def getInfo():
             # 計算當月目標
             tarMoney = int(money / part)
             check += 1
+            status = True
             break
     # 若無"執行中"的目標，回傳空值
     if check == 0:
@@ -345,7 +347,7 @@ def getInfo():
     targetMoney = tarMoney - sarplus
 
     # 回傳至前端
-    return f'{user},{name},{profession},{budget},{salaryTotal},{costTotal},{tarMoney},{targetMoney}'
+    return f'{user},{name},{profession},{budget},{salaryTotal},{costTotal},{tarMoney},{targetMoney},{status}'
 
 @app.route("/getBucket",methods=['POST'])
 def getBucket():
@@ -355,6 +357,7 @@ def getBucket():
     remain = 0
     month = 0
     part = 0
+    status = False
 
     if not len(firebase_admin._apps):
         # 引用私密金鑰
@@ -403,7 +406,6 @@ def getBucket():
         target = ""
         tarMoney = 0
         surplus = 0
-        status = False
         remain = 0
 
     # 回傳至前端
@@ -564,6 +566,7 @@ def result4():
     remain = 0
     month = 0
     part = 0
+    tarMoney = 0
 
     if not len(firebase_admin._apps):
         # 引用私密金鑰
