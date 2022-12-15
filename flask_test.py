@@ -251,20 +251,23 @@ def bucketUpdate():
     for doc in doc_bucketRef:
         if doc.get('status') == "執行中":
             bid = doc.id
+            part = int(doc.get('part'))
             sarplus = int(doc.get('sarplus'))
             break
     # 指向帳務資料
     doc_accountRef = db.collection("users").document(uid).collection("Account")
-    # 查詢所有帳務
-    doc_costRef = doc_accountRef.stream()
-    # 取得支出，並計算該月總支出、總收入
-    for doc in doc_costRef:
-        if doc.get('tradeType') != "額外收入" and int(doc.get('month')) == datetime.datetime.now().month:
-            costTotal += int(doc.get('money'))
-        elif doc.get('tradeType') == "額外收入" and int(doc.get('month')) == datetime.datetime.now().month:
-            salaryTotal += int(doc.get('money'))
+    # 取得支出，並計算該期總支出、總收入
+    for i in range(part):
+        # 查詢所有帳務
+        doc_costRef = doc_accountRef.stream()
+        for doc in doc_costRef:
+            if doc.get('tradeType') != "額外收入" and int(doc.get('month')) == datetime.datetime.now().month - i:
+                costTotal += int(doc.get('money'))
+            elif doc.get('tradeType') == "額外收入" and int(doc.get('month')) == datetime.datetime.now().month - i:
+                salaryTotal += int(doc.get('money'))
     # 計算盈餘
     sarplus = salaryTotal - costTotal
+    print(sarplus)
     if sarplus < 0:
         sarplus = 0
     # 更新目標以省下的金額
@@ -628,6 +631,7 @@ def result4():
     month = 0
     part = 0
     tarMoney = 0
+    nextRange = 0
 
     if not len(firebase_admin._apps):
         # 引用私密金鑰
@@ -649,6 +653,7 @@ def result4():
             part = int(doc.get('part'))
             month = int(doc.get('month'))
             year = int(doc.get('year'))
+            sarplus = int(doc.get('sarplus'))
             # 計算當月目標
             tarMoney = int(money / part)
             check += 1
@@ -673,24 +678,26 @@ def result4():
         elif doc.get('tradeType') == "額外收入" and int(doc.get('month')) == datetime.datetime.now().month:
             salaryTotal += int(doc.get('money'))
     # 計算該月盈餘
-    surplus = salaryTotal - costTotal
-    if surplus < 0:
-        surplus = 0
+    thisSurplus = salaryTotal - costTotal
+    if thisSurplus < 0:
+        thisSurplus = 0
     # 計算是否達到目標
-    tarRange = surplus - tarMoney
-    nextRange = 0
+    tarRange = thisSurplus - tarMoney
     if tarRange >= 0:
         status = 1
         print(f'多{tarRange}')
     else:
         status = 2
         print(f'少{tarRange * -1}')
+    nextRange = (money - sarplus) / part
     # 若無"執行中"的目標，回傳空值
     if check == 0:
         status = 0
+        remain = 0
+        nextRange = 0
 
     # 回傳至前端
-    return f'{status},{tarRange},{remain}'
+    return f'{status},{remain},{nextRange}'
 
 if __name__ == '__main__':
     app.debug = True
