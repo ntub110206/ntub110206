@@ -190,6 +190,7 @@ def accountUpdate():
 
 @app.route("/bucketAdd",methods=['POST'])
 def bucketAdd():
+    sarplus = 0
     if not len(firebase_admin._apps):
         # 引用私密金鑰
         cred = credentials.Certificate('./serviceAccount.json')
@@ -201,6 +202,7 @@ def bucketAdd():
     uid = request.values['uid']
     target = request.values['target']
     date = request.values['date']
+    year = request.values['year']
     month = request.values['month']
     tradeType = request.values['title']
     detail = request.values['detail']
@@ -215,8 +217,10 @@ def bucketAdd():
         'target':target,
         'tradeType':tradeType,
         'detail':detail,
+        'year':year,
         'money':money,
         'part':part,
+        'sarplus':sarplus,
         'status':status
     }
     # 寫入
@@ -225,6 +229,51 @@ def bucketAdd():
 
     # 回傳至前端
     return mess
+
+@app.route("/bucketUpdate",methods=['POST'])
+def bucketUpdate():
+    costTotal = 0
+    salaryTotal = 0
+    if not len(firebase_admin._apps):
+        # 引用私密金鑰
+        cred = credentials.Certificate('./serviceAccount.json')
+        # 初始化firebase，注意不能重複初始化
+        firebase_admin.initialize_app(cred)
+    # 初始化firestore
+    db = firestore.client()
+    # 取得前端資訊
+    uid = request.values['uid']
+    # 指向目標
+    doc_Bref = db.collection("users").document(uid).collection("Bucket")
+    # 查詢所有目標文件
+    doc_bucketRef = doc_Bref.stream()
+    # 找出"執行中"的目標id
+    for doc in doc_bucketRef:
+        if doc.get('status') == "執行中":
+            bid = doc.id
+            sarplus = int(doc.get('sarplus'))
+            break
+    # 指向帳務資料
+    doc_accountRef = db.collection("users").document(uid).collection("Account")
+    # 查詢所有帳務
+    doc_costRef = doc_accountRef.stream()
+    # 取得支出，並計算該月總支出、總收入
+    for doc in doc_costRef:
+        if doc.get('tradeType') != "額外收入" and int(doc.get('month')) == datetime.datetime.now().month:
+            costTotal += int(doc.get('money'))
+        elif doc.get('tradeType') == "額外收入" and int(doc.get('month')) == datetime.datetime.now().month:
+            salaryTotal += int(doc.get('money'))
+    # 計算盈餘
+    sarplus = salaryTotal - costTotal
+    if sarplus < 0:
+        sarplus = 0
+    # 更新目標以省下的金額
+    doc_Bref = db.collection("users").document(uid).collection("Bucket").document(bid)
+    docS = {'sarplus':sarplus}
+    doc_Bref.update(docS)
+
+    return ''
+
 
 @app.route("/bucketQuit",methods=['POST'])
 def bucketQuit():
@@ -325,6 +374,8 @@ def getInfo():
             salaryTotal += int(doc.get('money'))
     # 計算盈餘
     sarplus = salaryTotal - costTotal
+    if sarplus < 0:
+        sarplus = 0
     # 指向目標
     doc_Bref = db.collection("users").document(uid).collection("Bucket")
     # 取得願望清單價錢，計算欲花費之預算
@@ -378,6 +429,7 @@ def getBucket():
             target = doc.get('target')
             money = int(doc.get('money'))
             part = int(doc.get('part'))
+            year = int(doc.get('year'))
             month = int(doc.get('month'))
             # 計算當月目標
             tarMoney = int(money / part)
@@ -386,7 +438,16 @@ def getBucket():
             break
 
     # 計算並更新剩餘期數
-    remain = part - (datetime.datetime.now().month - month)
+    yearRemain = datetime.datetime.now().year - year
+    monthRemain = datetime.datetime.now().month - month
+    # yy = 2023
+    # mm = 1
+    # yearRemain = yy - year
+    # monthRemain = mm - month
+    if monthRemain < 0:
+        yearRemain -= 1
+        monthRemain += 12
+    remain = part - (yearRemain * 12 + monthRemain)
     # 指向帳務資料
     doc_Aref = db.collection("users").document(uid).collection("Account")
     # 查詢所有帳務
@@ -587,6 +648,7 @@ def result4():
             money = int(doc.get('money'))
             part = int(doc.get('part'))
             month = int(doc.get('month'))
+            year = int(doc.get('year'))
             # 計算當月目標
             tarMoney = int(money / part)
             check += 1
@@ -594,7 +656,12 @@ def result4():
             break
 
     # 計算並更新剩餘期數
-    remain = part - (datetime.datetime.now().month - month)
+    yearRemain = datetime.datetime.now().year - year
+    monthRemain = datetime.datetime.now().month - month
+    if monthRemain < 0:
+        yearRemain -= 1
+        monthRemain += 12
+    remain = part - (yearRemain * 12 + monthRemain)
     # 指向帳務資料
     doc_Aref = db.collection("users").document(uid).collection("Account")
     # 查詢所有帳務
@@ -610,16 +677,20 @@ def result4():
     if surplus < 0:
         surplus = 0
     # 計算是否達到目標
-    if surplus >= tarMoney:
+    tarRange = surplus - tarMoney
+    nextRange = 0
+    if tarRange >= 0:
         status = 1
+        print(f'多{tarRange}')
     else:
         status = 2
+        print(f'少{tarRange * -1}')
     # 若無"執行中"的目標，回傳空值
     if check == 0:
         status = 0
 
     # 回傳至前端
-    return f'{status}'
+    return f'{status},{tarRange},{remain}'
 
 if __name__ == '__main__':
     app.debug = True
