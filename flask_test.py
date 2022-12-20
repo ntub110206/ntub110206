@@ -409,6 +409,7 @@ def getBucket():
     salaryTotal = 0
     check = 0
     remain = 0
+    year = 0
     month = 0
     part = 0
     status = False
@@ -626,9 +627,12 @@ def result4():
     result4 = ""
     costTotal = 0
     salaryTotal = 0
+    money = 0
+    sarplus = 0
     check = 0
     remain = 0
     month = 0
+    year = 0
     part = 0
     tarMoney = 0
     nextRange = 0
@@ -685,17 +689,19 @@ def result4():
     tarRange = thisSurplus - tarMoney
     if tarRange >= 0:
         status = 1
-        print(f'多{tarRange}')
+        # print(f'多{tarRange}')
     else:
         status = 2
-        print(f'少{tarRange * -1}')
-    nextRange = (money - sarplus) / part
+        # print(f'少{tarRange * -1}')
     # 若無"執行中"的目標，回傳空值
     if check == 0:
         status = 0
         remain = 0
         nextRange = 0
+    else:
+        nextRange = (money - sarplus) / part
 
+    # print(nextRange)
     # 回傳至前端
     return f'{status},{remain},{nextRange}'
 
